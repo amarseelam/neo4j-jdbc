@@ -30,7 +30,9 @@ import org.neo4j.jdbc.rest.TransactionalQueryExecutor;
 import org.neo4j.jdbc.util.UserAgentBuilder;
 import org.restlet.Client;
 import org.restlet.Context;
+import org.restlet.data.Parameter;
 import org.restlet.data.Protocol;
+import org.restlet.util.Series;
 
 import java.io.IOException;
 import java.sql.DatabaseMetaData;
@@ -117,7 +119,14 @@ public class Neo4jConnection extends AbstractConnection
                 log.debug( "Connecting to URL " + url );
             }
 
-            Client client = new Client( new Context(), Arrays.asList( Protocol.valueOf(remoteUrl.split( ":" )[0]) ), properties.getProperty( "restlet.helperclass" ) );
+            Context context = new Context();
+            Series<Parameter> parameters = new Series<Parameter>(Parameter.class);
+            parameters.add(Parameter.create("maxConnectionsPerHost", "100"));
+            parameters.add(Parameter.create("maxTotalConnections", "100"));
+			context.setParameters(parameters);
+			Client client = new Client( context, Arrays.asList( Protocol.valueOf(remoteUrl.split( ":" )[0]) ), properties.getProperty( "restlet.helperclass" ) );
+
+           //Client client = new Client( new Context(), Arrays.asList( Protocol.valueOf(remoteUrl.split( ":" )[0]) ), properties.getProperty( "restlet.helperclass" ) );
 
             Resources resources = new Resources( remoteUrl, client, userAgent );
 
